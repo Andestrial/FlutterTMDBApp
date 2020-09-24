@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -12,13 +14,15 @@ class TVView extends StatefulWidget {
   @override
   _TVViewState createState() => _TVViewState();
 }
-class _TVViewState extends State<TVView> {
 
+class _TVViewState extends State<TVView> {
+  
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     tvBloc.getTv();
+    showBottomSheet(context: null, builder: null)
   }
 
   @override
@@ -31,12 +35,12 @@ class _TVViewState extends State<TVView> {
             return buildErrorWidget(snapshot.data.error);
           }
           return buildTVScreen(snapshot.data);
-        }
-        else if (snapshot.hasError) {
+        } else if (snapshot.hasError) {
           return buildErrorWidget(snapshot.error);
-        }
-        else {
-          return Center(child: CircularProgressIndicator(),);
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
         }
       },
     );
@@ -49,58 +53,93 @@ class _TVViewState extends State<TVView> {
       decoration: BoxDecoration(
           color: Colors.grey[800],
           borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10))
-      ),
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10))),
       width: double.infinity,
-      height: 230,
+      height: 240,
       child: ListView.builder(
+          itemExtent: 120,
           scrollDirection: Axis.horizontal,
-          itemCount: tvs.take(50)
-              .length,
+          itemCount: tvs.take(50).length,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
-
-                child: InkWell(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => TVScreen(tvs[index], baseLink)
-                    ));
-                  },
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                          fullscreenDialog: true,
+                          transitionsBuilder: (BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secondaryAnimation,
+                              Widget child) {
+                            return Align(
+                                child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ));
+                          },
+                          transitionDuration: Duration(milliseconds: 600),
+                          pageBuilder: (BuildContext context, __, ___) =>
+                              TVScreen(tvs[index], baseLink)));
+                },
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Hero(
+                        tag: 'image' + tvs[index].name,
+                        child: Container(
                           height: 160,
                           width: 100,
-                          color: Colors.black,
-                          child: Image.network(
-                            baseLink + tvs[index].poster, fit: BoxFit.cover,),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Text(tvs[index].name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                        ),
-                        Row(
-                          children: [
-                            RatingBar(
-                              itemSize: 10,
-                              initialRating: tvs[index].votes,
-                              onRatingUpdate: (double value) { print(value); },
-                              itemBuilder: (context, _ ){
-                                return Icon(Icons.star, color: Colors.yellow,);
-                              },
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                baseLink + tvs[index].poster,
+                              ),
+                              fit: BoxFit.cover,
                             ),
-                            SizedBox(width: 5,),
-                            Text('${tvs[index].votes}' , style: TextStyle(color: Colors.white),),
-                          ],
-                        )
-
-                      ],
-                    ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Text(
+                          tvs[index].name,
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          RatingBar(
+                            itemSize: 10,
+                            initialRating: tvs[index].votes,
+                            onRatingUpdate: (double value) {
+                              print(value);
+                            },
+                            itemBuilder: (context, _) {
+                              return Icon(
+                                Icons.star,
+                                color: Colors.yellow,
+                              );
+                            },
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            '${tvs[index].votes}',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      )
+                    ],
                   ),
                 ),
+              ),
             );
           }),
     );

@@ -51,6 +51,7 @@ class _MovieViewState extends State<MovieView> {
     }
     else {
       return Container(
+        color: Colors.grey[800],
         height: 320,
         child: PageIndicatorContainer(
           length: movie.take(5).length,
@@ -64,6 +65,7 @@ class _MovieViewState extends State<MovieView> {
                       width: double.infinity,
                       height: 320,
                       decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(bottomRight: Radius.elliptical(30, 10), bottomLeft: Radius.elliptical(30, 10)),
                         image: DecorationImage(
                             image: NetworkImage(
                                 'https://image.tmdb.org/t/p/w500/' +

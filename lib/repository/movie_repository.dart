@@ -29,9 +29,8 @@ class MovieRepository{
   Future<TVResponse> getTv() async{
     var params = {
       'api_key' : apiKey,
-      'language' : 'eu-US',
+      'language' : 'en-US',
       'page' : 1,
-      'sort_by' : 'popularity.desc',
     };
     try{
       Response response = await dio.get(getTvUrl, queryParameters: params);

@@ -17,12 +17,15 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body:  Column(
-            children: [
-              MovieView(),
-              TVView(),
-            ],
-          ),
+        backgroundColor: Colors.black54,
+        body:  SingleChildScrollView(
+          child: Column(
+              children: [
+                MovieView(),
+                TVView(),
+              ],
+            ),
+        ),
         ),
     );
   }
