@@ -1,5 +1,5 @@
-import 'package:flutter_web_screen/models/discover_movie_model.dart';
-import 'package:flutter_web_screen/models/discover_tv_model.dart';
+import 'package:flutter_web_screen/models/movie_model.dart';
+import 'package:flutter_web_screen/models/tv_model.dart';
 
 class TVResponse {
   List<TVModel> result;

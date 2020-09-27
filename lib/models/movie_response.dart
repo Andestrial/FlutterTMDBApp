@@ -1,4 +1,4 @@
-import 'package:flutter_web_screen/models/discover_movie_model.dart';
+import 'package:flutter_web_screen/models/movie_model.dart';
 
 class MovieResponse {
   List<MovieModel> result;

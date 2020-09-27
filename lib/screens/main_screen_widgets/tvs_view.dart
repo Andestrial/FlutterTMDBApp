@@ -1,14 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_web_screen/bloc/tv_bloc.dart';
-import 'package:flutter_web_screen/models/discover_tv_model.dart';
-import 'package:flutter_web_screen/models/tv_response_model.dart';
+import 'package:flutter_web_screen/models/tv_model.dart';
+import 'package:flutter_web_screen/models/tv_response.dart';
 import 'package:flutter_web_screen/screens/widgets/error_widget.dart';
 
-import '../tv_screen.dart';
+import '../detail_screen.dart';
 
 class TVView extends StatefulWidget {
   @override
@@ -22,7 +20,6 @@ class _TVViewState extends State<TVView> {
     // TODO: implement initState
     super.initState();
     tvBloc.getTv();
-    showBottomSheet(context: null, builder: null)
   }
 
   @override
@@ -38,8 +35,11 @@ class _TVViewState extends State<TVView> {
         } else if (snapshot.hasError) {
           return buildErrorWidget(snapshot.error);
         } else {
-          return Center(
-            child: CircularProgressIndicator(),
+          return Container(
+            height: 240,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
       },
@@ -47,7 +47,6 @@ class _TVViewState extends State<TVView> {
   }
 
   Widget buildTVScreen(TVResponse data) {
-    final String baseLink = 'https://image.tmdb.org/t/p/w500/';
     List<TVModel> tvs = data.result;
     return Container(
       decoration: BoxDecoration(
@@ -80,13 +79,15 @@ class _TVViewState extends State<TVView> {
                               child: child,
                             ));
                           },
-                          transitionDuration: Duration(milliseconds: 600),
+                          transitionDuration: Duration(milliseconds: 400),
                           pageBuilder: (BuildContext context, __, ___) =>
-                              TVScreen(tvs[index], baseLink)));
+                              DetailScreen( tvs[index], 'tv')));
                 },
                 child: Container(
+
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Hero(
                         tag: 'image' + tvs[index].name,
@@ -95,12 +96,21 @@ class _TVViewState extends State<TVView> {
                           width: 100,
                           decoration: BoxDecoration(
                             color: Colors.black,
+                            borderRadius: BorderRadius.circular(10),
                             image: DecorationImage(
                               image: NetworkImage(
-                                baseLink + tvs[index].poster,
+                                 tvs[index].poster,
                               ),
                               fit: BoxFit.cover,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                spreadRadius: 5,
+                                blurRadius: 7,
+                                offset: Offset(3,3),
+
+                              )
+                            ]
                           ),
                         ),
                       ),
@@ -108,11 +118,13 @@ class _TVViewState extends State<TVView> {
                         padding: const EdgeInsets.all(5.0),
                         child: Text(
                           tvs[index].name,
+                          maxLines: 2,
                           style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                              color: Colors.white, fontWeight: FontWeight.bold,),
                         ),
                       ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           RatingBar(
                             itemSize: 10,
@@ -134,6 +146,7 @@ class _TVViewState extends State<TVView> {
                             '${tvs[index].votes}',
                             style: TextStyle(color: Colors.white),
                           ),
+
                         ],
                       )
                     ],

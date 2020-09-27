@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_web_screen/models/movie_response_model.dart';
-import 'package:flutter_web_screen/models/tv_response_model.dart';
+import 'package:flutter_web_screen/models/actor_response.dart';
+import 'package:flutter_web_screen/models/movie_response.dart';
+import 'package:flutter_web_screen/models/tv_response.dart';
 
 class MovieRepository{
   final String apiKey = '10d39203e458fc0a8dec50a358c99540';
@@ -9,6 +10,7 @@ class MovieRepository{
 
   String getMovieUrl = '$baseUrl/discover/movie';
   String getTvUrl = '$baseUrl/discover/tv';
+  String getCreditsUrl = '$baseUrl';
 
   Future<MovieResponse> getMovie() async{
     var params = {
@@ -39,6 +41,19 @@ class MovieRepository{
     catch(e){
       print(e);
       return TVResponse.withError('$e');
+    }
+  }
+  Future<ActorResponse> getCredits (int id, String type)async{
+    var params = {
+      'api_key' : apiKey,
+    };
+    try{
+      Response response = await dio.get("$getCreditsUrl/$type/$id/credits", queryParameters: params);
+      print(response.data['cast']);
+      return ActorResponse.fromJson(response.data);
+    }
+    catch(e){
+      return ActorResponse.withError(e.toString());
     }
   }
 }

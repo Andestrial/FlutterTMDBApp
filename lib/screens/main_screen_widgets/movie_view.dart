@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_screen/bloc/movie_bloc.dart';
-import 'package:flutter_web_screen/models/discover_movie_model.dart';
-import 'package:flutter_web_screen/models/movie_response_model.dart';
+import 'package:flutter_web_screen/models/movie_model.dart';
+import 'package:flutter_web_screen/models/movie_response.dart';
 import 'package:flutter_web_screen/screens/widgets/error_widget.dart';
 import 'package:page_indicator/page_indicator.dart';
+import '../detail_screen.dart';
 
 class MovieView extends StatefulWidget {
   @override
@@ -38,7 +39,11 @@ class _MovieViewState extends State<MovieView> {
           return buildErrorWidget(snapshot.error);
         }
         else {
-          return Center(child: CircularProgressIndicator(),);
+          return Container(
+            height: 320,
+            child: Center(
+              child: CircularProgressIndicator(),),
+          );
         }
       },
     );
@@ -46,6 +51,7 @@ class _MovieViewState extends State<MovieView> {
 
   Widget buildMovieScreen(MovieResponse data) {
     List<MovieModel> movie = data.result;
+    print(movie[0].runtimeType);
     if(movie.length == 0){
       return Container(child: Text("NINE FILMES"),);
     }
@@ -61,16 +67,39 @@ class _MovieViewState extends State<MovieView> {
               itemBuilder: (context, index) {
                 return Stack(
                   children: [
-                    Container(
-                      width: double.infinity,
-                      height: 320,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(bottomRight: Radius.elliptical(30, 10), bottomLeft: Radius.elliptical(30, 10)),
-                        image: DecorationImage(
-                            image: NetworkImage(
-                                'https://image.tmdb.org/t/p/w500/' +
-                                    movie[index].poster),
-                            fit: BoxFit.cover
+                    InkWell(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                                fullscreenDialog: true,
+                                transitionsBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secondaryAnimation,
+                                    Widget child) {
+                                  return Align(
+                                      child: FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      ));
+                                },
+                                transitionDuration: Duration(milliseconds: 400),
+                                pageBuilder: (BuildContext context, __, ___) =>
+                                    DetailScreen( movie[index], 'movie')));
+                      },
+                      child: Hero(
+                        tag: 'image' + movie[index].name,
+                        child: Container(
+                          width: double.infinity,
+                          height: 320,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(bottomRight: Radius.elliptical(30, 10), bottomLeft: Radius.elliptical(30, 10)),
+                            image: DecorationImage(
+                                image: NetworkImage(
+                                        movie[index].poster),
+                                fit: BoxFit.cover
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -83,7 +112,7 @@ class _MovieViewState extends State<MovieView> {
                             color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text(movie[index].title,style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white,),)),
+                          child: Text(movie[index].name,style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white,),)),
                     )
                   ],
                 );

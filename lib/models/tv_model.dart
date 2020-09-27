@@ -12,6 +12,6 @@ class TVModel {
         name = json['name'],
         votes = double.parse(json['vote_average'].toString()),
         overview = json['overview'],
-        poster = json['poster_path'];
+        poster = 'https://image.tmdb.org/t/p/w500/'+ json['poster_path'];
 
 }

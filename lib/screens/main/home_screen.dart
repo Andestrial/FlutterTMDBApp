@@ -1,9 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_screen/bloc/movie_bloc.dart';
-import 'package:flutter_web_screen/bloc/tv_bloc.dart';
-import 'package:flutter_web_screen/models/discover_tv_model.dart';
-import 'package:flutter_web_screen/models/tv_response_model.dart';
 import 'package:flutter_web_screen/screens/main_screen_widgets/movie_view.dart';
 import 'package:flutter_web_screen/screens/main_screen_widgets/tvs_view.dart';
 
@@ -19,12 +15,15 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         backgroundColor: Colors.black54,
         body:  SingleChildScrollView(
-          child: Column(
-              children: [
-                MovieView(),
-                TVView(),
-              ],
-            ),
+          child: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  MovieView(),
+                  TVView(),
+                ],
+              ),
+          ),
         ),
         ),
     );

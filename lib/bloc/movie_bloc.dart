@@ -1,4 +1,4 @@
-import 'package:flutter_web_screen/models/movie_response_model.dart';
+import 'package:flutter_web_screen/models/movie_response.dart';
 import 'package:flutter_web_screen/repository/movie_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
