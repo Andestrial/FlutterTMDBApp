@@ -1,9 +1,10 @@
 import 'package:flutter_web_screen/models/actor_response.dart';
 import 'package:flutter_web_screen/repository/movie_repository.dart';
+import 'package:flutter_web_screen/repository/movie_repository_inc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ActorsBloc {
-  final MovieRepository repository = MovieRepository();
+  MovieRepository repository  = MovieRepositoryInc();
   BehaviorSubject<ActorResponse> _subject = BehaviorSubject<ActorResponse>();
 
   getCredits(int id , String type)async{

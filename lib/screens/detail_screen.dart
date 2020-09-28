@@ -28,23 +28,24 @@ class _DetailScreenState extends State<DetailScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    print(widget.dataModel.id);
     _model = widget.dataModel;
     _type = widget.type;
     actorsBloc..getCredits(_model.id, _type);
     controller = AnimationController(
         duration: const Duration(milliseconds: 350), vsync: this);
     // #docregion addListener
-    animation = Tween<double>(begin: 0, end: 0.2).animate(controller)
+    animation = Tween<double>(begin: 0, end: 0.3).animate(controller)
       ..addListener(() {
-        setState(() {});
+        setState(() {
+        });
         // #enddocregion addListener
       });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(
         const Duration(milliseconds: 200),
-        () => controller.forward(),
+            () => controller.forward(),
       );
     });
   }
@@ -72,26 +73,29 @@ class _DetailScreenState extends State<DetailScreen>
       body: Stack(
         children: [
           Hero(
-            tag: 'image' + _model.name,
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(_model.poster),
+              tag: 'image' + _model.name,
+              child: Container(
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(_model.poster),
 
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10))),
-  )        ),
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10))),
+              )),
         ],
       ),
       bottomSheet: DraggableScrollableSheet(
-          expand: true,
+          expand: false,
           initialChildSize: animation.value,
-          minChildSize: animation.value,
+          minChildSize: animation.value ,
           maxChildSize: 1,
           builder: (context, ScrollController scrollController) {
             print('Here');
@@ -109,9 +113,9 @@ class _DetailScreenState extends State<DetailScreen>
                 controller: scrollController,
                 child: Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                  const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   child: Column(
-//                    crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Padding(
@@ -125,59 +129,65 @@ class _DetailScreenState extends State<DetailScreen>
                             ),
                           ),
                         ),
-                        Center(
-                            child: Text(
-                          _model.name,
-                          style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        )),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: RatingBar(
-                                itemSize: 45,
-                                initialRating: _model.votes,
-                                onRatingUpdate: (double value) {
-                                  print(value);
-                                },
-                                itemBuilder: (context, _) {
-                                  return Container(
-                                    decoration: BoxDecoration(boxShadow: [
-                                      BoxShadow(
-                                          offset: Offset(3, 3),
-                                          blurRadius: 20,
-                                          spreadRadius: 0.1)
-                                    ]),
-                                    child: Icon(
-                                      Icons.star,
-                                      color: Colors.yellow,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: Text(
-                                '${_model.votes}',
+                        Container(
+                          height: MediaQuery.of(context).size.height *0.223,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                _model.name,
                                 style: TextStyle(
-                                    color: Colors.white,
                                     fontSize: 35,
-                                    fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 40,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: RatingBar(
+                                      itemSize: 45,
+                                      initialRating: _model.votes,
+                                      onRatingUpdate: (double value) {
+                                        print(value);
+                                      },
+                                      itemBuilder: (context, _) {
+                                        return Container(
+                                          decoration: BoxDecoration(boxShadow: [
+                                            BoxShadow(
+                                                offset: Offset(3, 3),
+                                                blurRadius: 20,
+                                                spreadRadius: 0.1)
+                                          ]),
+                                          child: Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Text(
+                                      '${_model.votes}',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 35,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ),],
+                          ),
                         ),
                         StreamBuilder(
                             stream: actorsBloc.subject.stream,
@@ -230,6 +240,10 @@ class _DetailScreenState extends State<DetailScreen>
   Widget buildActorsWidget(ActorResponse data) {
     List<ActorModel> actors = data.casts;
     return Container(
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
       height: 160,
       child: ListView.builder(
           itemExtent: 120,
@@ -248,7 +262,9 @@ class _DetailScreenState extends State<DetailScreen>
                         height: 100,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                              image: NetworkImage(actors[i].image),
+                              image: actors[i].image !=
+                                  'https://image.tmdb.org/t/p/w185/null'
+                                  ? NetworkImage(actors[i].image) : AssetImage('assets/User.png'),
                               fit: BoxFit.cover),
                           shape: BoxShape.circle,
                         )),

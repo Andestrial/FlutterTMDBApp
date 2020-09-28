@@ -1,9 +1,10 @@
 import 'package:flutter_web_screen/models/movie_response.dart';
 import 'package:flutter_web_screen/repository/movie_repository.dart';
+import 'package:flutter_web_screen/repository/movie_repository_inc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MovieBloc {
-  final MovieRepository repository = MovieRepository();
+  MovieRepository repository  = MovieRepositoryInc();
   BehaviorSubject<MovieResponse> _subject = BehaviorSubject<MovieResponse>();
 
   getMovie()async{
