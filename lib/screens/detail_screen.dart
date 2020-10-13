@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_web_screen/bloc/actors_bloc.dart';
 import 'package:flutter_web_screen/models/actor_model.dart';
 import 'package:flutter_web_screen/models/actor_response.dart';
 import 'package:flutter_web_screen/screens/widgets/error_widget.dart';
-import 'package:page_indicator/page_indicator.dart';
 
 class DetailScreen extends StatefulWidget {
   final dataModel;
@@ -18,11 +18,17 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   var _model;
   String _type;
   AnimationController controller;
+  AnimationController secondController;
   Animation<double> animation;
+  Animation<double> secondAnimation;
+  bool firsAnimationComplete = false ;
+  Tween blabla = Tween<double>(begin: 0.3, end: 1);
+  double begin;
+  bool secAnimComplete = true;
 
   @override
   void initState() {
@@ -32,15 +38,25 @@ class _DetailScreenState extends State<DetailScreen>
     _model = widget.dataModel;
     _type = widget.type;
     actorsBloc..getCredits(_model.id, _type);
+    secondController = AnimationController(
+      duration: const Duration(milliseconds: 200), vsync: this
+    );
     controller = AnimationController(
         duration: const Duration(milliseconds: 350), vsync: this);
     // #docregion addListener
     animation = Tween<double>(begin: 0, end: 0.3).animate(controller)
       ..addListener(() {
         setState(() {
+          if(animation.isCompleted){
+            firsAnimationComplete = true;
+          }
         });
         // #enddocregion addListener
       });
+    
+    secondAnimation = Tween<double>(begin: 0.3, end: 1).animate(secondController)..addListener(() {setState(() {
+
+    });});
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(
@@ -54,6 +70,22 @@ class _DetailScreenState extends State<DetailScreen>
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+  void _onStartScroll(DraggableScrollableNotification metric){
+    print(metric);
+  }
+  void _onUpdateScroll(DraggableScrollableNotification metrics){
+    print(metrics);
+  }
+  void _onEndScroll(metrics){
+    if(secAnimComplete) {
+      secondController.forward();
+      secAnimComplete = false;
+    }
+    else{
+      secondController.reverse();
+      secAnimComplete = true;
+    }
   }
 
   @override
@@ -92,148 +124,172 @@ class _DetailScreenState extends State<DetailScreen>
               )),
         ],
       ),
-      bottomSheet: DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: animation.value,
-          minChildSize: animation.value ,
-          maxChildSize: 1,
-          builder: (context, ScrollController scrollController) {
-            print('Here');
-            return Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xcc4E4E53), Color(0xcc232326)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      topLeft: Radius.circular(20))),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Padding(
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 0, bottom: 15),
-                          child: Container(
-                            height: 5,
-                            width: 70,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          height: MediaQuery.of(context).size.height *0.223,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Text(
-                                _model.name,
-                                style: TextStyle(
-                                    fontSize: 35,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                                maxLines: 2,
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
+      bottomSheet: NotificationListener<DraggableScrollableNotification>(
+        onNotification: (draggbleScrollableNotif){
+
+          if(secAnimComplete){
+            blabla.begin = draggbleScrollableNotif.extent;
+            blabla.end = draggbleScrollableNotif.maxExtent;
+          }
+          if(!secAnimComplete){
+            blabla.end = draggbleScrollableNotif.extent;
+            blabla.begin = draggbleScrollableNotif.minExtent;
+          }
+          secondAnimation =
+          Tween<double>(end: blabla.end, begin: blabla.begin).animate(
+              secondController)
+            ..addListener(() {
+              setState(() {
+
+              });
+            });
+        },
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (scrollNotif) {
+            if(scrollNotif is ScrollEndNotification)
+              {
+                _onEndScroll(scrollNotif.metrics);
+              }
+          },
+          child: DraggableScrollableSheet(
+              expand: false,
+              initialChildSize:  firsAnimationComplete? secondAnimation.value: animation.value,
+              minChildSize:  animation.value,
+              maxChildSize: 1,
+              builder: (context, ScrollController scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xcc4E4E53), Color(0xcc232326)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20),
+                          topLeft: Radius.circular(20))),
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 0, bottom: 15),
+                              child: Container(
+                                height: 5,
+                                width: 70,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                            ),
+                            Container(
+                              height: MediaQuery.of(context).size.height *0.223,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: RatingBar(
-                                      itemSize: 45,
-                                      initialRating: _model.votes,
-                                      onRatingUpdate: (double value) {
-                                        print(value);
-                                      },
-                                      itemBuilder: (context, _) {
-                                        return Container(
-                                          decoration: BoxDecoration(boxShadow: [
-                                            BoxShadow(
-                                                offset: Offset(3, 3),
-                                                blurRadius: 20,
-                                                spreadRadius: 0.1)
-                                          ]),
-                                          child: Icon(
-                                            Icons.star,
-                                            color: Colors.yellow,
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                  Text(
+                                    _model.name,
+                                    style: TextStyle(
+                                        fontSize: 35,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                    maxLines: 2,
+                                    textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Text(
-                                      '${_model.votes}',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ],
-                              ),],
-                          ),
-                        ),
-                        StreamBuilder(
-                            stream: actorsBloc.subject.stream,
-                            builder: (context,
-                                AsyncSnapshot<ActorResponse> snapshot) {
-                              if (snapshot.hasData) {
-                                if (snapshot.data.error != null &&
-                                    snapshot.data.error.length > 0) {
-                                  return buildErrorWidget(snapshot.error);
-                                }
-                                return buildActorsWidget(snapshot.data);
-                              }
-                              if (snapshot.hasError) {
-                                return buildErrorWidget(snapshot.error);
-                              } else {
-                                return Center(
-                                  child: LinearProgressIndicator(),
-                                );
-                              }
-                            }),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Overview',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 5),
-                          child: Text(
-                            _model.overview,
-                            style: TextStyle(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20),
-                          ),
-                        )
-                      ]),
-                ),
-              ),
-            );
-          }),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: RatingBar(
+                                          itemSize: 45,
+                                          initialRating: _model.votes,
+                                          onRatingUpdate: (double value) {
+                                            print(value);
+                                          },
+                                          itemBuilder: (context, _) {
+                                            return Container(
+                                              decoration: BoxDecoration(boxShadow: [
+                                                BoxShadow(
+                                                    offset: Offset(3, 3),
+                                                    blurRadius: 20,
+                                                    spreadRadius: 0.1)
+                                              ]),
+                                              child: Icon(
+                                                Icons.star,
+                                                color: Colors.yellow,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Text(
+                                          '${_model.votes}',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 35,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),],
+                              ),
+                            ),
+                            StreamBuilder(
+                                stream: actorsBloc.subject.stream,
+                                builder: (context,
+                                    AsyncSnapshot<ActorResponse> snapshot) {
+                                  if (snapshot.hasData) {
+                                    if (snapshot.data.error != null &&
+                                        snapshot.data.error.length > 0) {
+                                      return buildErrorWidget(snapshot.error);
+                                    }
+                                    return buildActorsWidget(snapshot.data);
+                                  }
+                                  if (snapshot.hasError) {
+                                    return buildErrorWidget(snapshot.error);
+                                  }
+                                }),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Overview',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 5),
+                              child: Text(
+                                _model.overview,
+                                style: TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20),
+                              ),
+                            )
+                          ]),
+                    ),
+                  ),
+                );
+              }),
+        ),
+      ),
     );
   }
 
